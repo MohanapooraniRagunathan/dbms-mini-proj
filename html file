@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Railway Ticket Booking</title>
+    <link rel="stylesheet" href="styles1.css">
+</head>
+<body>
+<main>
+    <header>
+        <div class="logo">
+            <h1>Railway Booking</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">About Us</a></li>
+                <li><a href="#">Contact</a></li>
+                <li><a href="login.html">Login</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section class="booking-section" style="margin-top: 40px;">
+        <h2>Book Your Ticket</h2>
+        <form id="booking-form">
+            <div class="form-group">
+                <label for="from">From:</label>
+                <input type="text" id="from" name="from" required>
+            </div>
+
+            <div class="form-group">
+                <label for="to">To:</label>
+                <input type="text" id="to" name="to" required>
+            </div>
+
+            <div class="form-group">
+                <label for="date">Date:</label>
+                <input type="date" id="date" name="date" required>
+            </div>
+
+            <div class="form-group">
+                <label for="passengers">Number of Passengers:</label>
+                <input type="number" id="passengers" name="passengers" min="1" required onchange="updatePassengerFields()">
+            </div>
+
+            <div id="passenger-details"></div>
+
+            <div class="form-group">
+                <label for="coach">Select Coach Type:</label>
+                <select id="coach" name="coach" required>
+                    <option value="sleeper">Sleeper</option>
+                    <option value="ac-3">AC 3 Tier</option>
+                    <option value="ac-2">AC 2 Tier</option>
+                    <option value="first-class">First Class</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="berth">Select Berth Preference:</label>
+                <select id="berth" name="berth" required>
+                    <option value="lower">Lower Berth</option>
+                    <option value="middle">Middle Berth</option>
+                    <option value="upper">Upper Berth</option>
+                    <option value="side-lower">Side Lower Berth</option>
+                </select>
+            </div>
+
+            <button type="button" id="submit-btn">Search Trains</button>
+        </form>
+
+        <script>
+            function updatePassengerFields() {
+                const numberOfPassengers = document.getElementById('passengers').value;
+                const passengerDetails = document.getElementById('passenger-details');
+                passengerDetails.innerHTML = ''; // Clear previous fields
+
+                for (let i = 0; i < numberOfPassengers; i++) {
+                    passengerDetails.innerHTML += `
+                        <h3>Passenger ${i + 1}</h3>
+                        <div class="form-group">
+                            <label for="sex-${i}">Sex:</label>
+                            <select id="sex-${i}" name="sex-${i}" required>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="age-${i}">Age:</label>
+                            <input type="number" id="age-${i}" name="age-${i}" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone-${i}">Phone Number:</label>
+                            <input type="tel" id="phone-${i}" name="phone-${i}" required>
+                        </div>
+                    `;
+                }
+            }
+
+            document.getElementById('submit-btn').addEventListener('click', function() {
+                const formData = {
+                    from: document.getElementById('from').value,
+                    to: document.getElementById('to').value,
+                    date: document.getElementById('date').value,
+                    passengers: [],
+                    coach: document.getElementById('coach').value,
+                    berth: document.getElementById('berth').value,
+                };
+
+                const numberOfPassengers = document.getElementById('passengers').value;
+                for (let i = 0; i < numberOfPassengers; i++) {
+                    const passenger = {
+                        sex: document.getElementById(`sex-${i}`).value,
+                        age: document.getElementById(`age-${i}`).value,
+                        phone: document.getElementById(`phone-${i}`).value,
+                    };
+                    formData.passengers.push(passenger);
+                }
+
+                fetch('http://localhost:5000/api/search-trains', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.bookings);
+                    // Optionally, update the UI with the trains data
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        </script>
+    </section>
+</main>
+</body>
+</html>
